@@ -1,7 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import bcrypt
+from flask_bcrypt import Bcrypt
 
 db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 def connect_db(app):
     """Connect this database to provided Flask app.
@@ -10,7 +11,9 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
-class User(db.Models):
+class User(db.Model):
+
+    __tablename__ = "users"
 
     username = db.Column(
         db.String(20), 
@@ -34,13 +37,15 @@ class User(db.Models):
         nullable=False)
 
     @classmethod
-    def register(cls, username, password):
-        """Register a user w/ hashed password and return user
-        IF both username and email are unique. Otherwise return false"""
-        #FINISH UP AFTER MAKING FORM
-        hashed = bcrypt.generate_password_hash(password).decode('utf8')
-
-        return cls(username=username, password=hashed)
+    def register(cls, username, password, email, first_name, last_name):
+        """Return an instance of the User class w/ hashed password."""
+        
+        return cls(
+            username=username,
+            password=hash_password(password),
+            email=email,
+            first_name=first_name,
+            last_name=last_name)
 
     @classmethod
     def login(cls, username, password):
@@ -52,3 +57,22 @@ class User(db.Models):
             return user
         else:
             return False
+
+    @classmethod
+    def check_login_credentials(cls, username, password):
+        """Returns the user if username and password are valid login credentials.
+        If invalid, it returns false"""
+        
+        user = cls.query.filter_by(username=username).one_or_none()
+
+        if user and bcrypt.check_password_hash(user.password, password):
+            return user
+        else:
+            return False
+
+
+def hash_password(password):
+    """Returns a bcrypt hash of the password provided"""
+    
+    hashed = bcrypt.generate_password_hash(password).decode('utf8')
+    return hashed
