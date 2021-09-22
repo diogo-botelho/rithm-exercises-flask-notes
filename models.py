@@ -40,23 +40,27 @@ class User(db.Model):
     def register(cls, username, password, email, first_name, last_name):
         """Return an instance of the User class w/ hashed password."""
         
-        return cls(
+        new_user = cls(
             username=username,
             password=hash_password(password),
             email=email,
             first_name=first_name,
             last_name=last_name)
 
-    @classmethod
-    def login(cls, username, password):
-        """Check for login w/ hashed password and return T/F"""
+        db.session.add(new_user)
+            #CODE REVIEW: db.session.add(new_user) should be done here. Then
+            #the commit happens in the route.
 
-        user = cls.query.filter_by(username=username).one_or_none()
+    # @classmethod
+    # def login(cls, username, password):
+    #     """Check for login w/ hashed password and return T/F"""
 
-        if user and bcrypt.check_password_hash(user.password, password):
-            return user
-        else:
-            return False
+    #     user = cls.query.filter_by(username=username).one_or_none()
+
+    #     if user and bcrypt.check_password_hash(user.password, password):
+    #         return user
+    #     else:
+    #         return False
 
     @classmethod
     def check_login_credentials(cls, username, password):
@@ -70,9 +74,10 @@ class User(db.Model):
         else:
             return False
 
-
-def hash_password(password):
-    """Returns a bcrypt hash of the password provided"""
-    
-    hashed = bcrypt.generate_password_hash(password).decode('utf8')
-    return hashed
+#CODEREVIEW: We had this as a separate function, but can be a static method of the class
+    @classmethod
+    def hash_password(cls,password):
+        """Returns a bcrypt hash of the password provided"""
+        
+        hashed = bcrypt.generate_password_hash(password).decode('utf8')
+        return hashed

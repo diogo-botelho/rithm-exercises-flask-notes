@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Secret{% endblock %}
+
+{% block content %}
+<h2>User Details for {{ user.username }}</h2>
+<ul>
+    <li>Username: {{ user.username }}</li>
+    <li>Email: {{ user.email }}</li>
+    <li>Name: {{ user.first_name }} {{ user.last_name }}</li>
+</ul>
+
+<form action="/logout" method="POST">
+    <button>
+        Log Out
+    </button>
+</form>
+{% endblock %}
